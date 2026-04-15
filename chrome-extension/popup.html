@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", sans-serif;
+    width: 300px;
+    padding: 16px;
+    background: #fafafa;
+    color: #1a1a1a;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .header h1 { font-size: 15px; font-weight: 600; }
+  .header .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #4caf50;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .current-session {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #eee;
+  }
+  .current-session .label {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .current-session .title {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .current-session .time {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ff2442;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .current-session .category {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #f0f0f0;
+    color: #555;
+    margin-top: 4px;
+  }
+  .stats {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid #eee;
+  }
+  .stats .label {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 3px 0;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    color: #333;
+  }
+  .stat-row .dur { color: #ff2442; font-weight: 600; min-width: 50px; text-align: right; }
+  .footer {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 10px;
+    color: #bbb;
+  }
+  .pending-badge {
+    display: inline-block;
+    background: #ff2442;
+    color: white;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  #flush-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 6px;
+    background: #ff2442;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  #flush-btn:hover { background: #e01f38; }
+  #flush-btn:disabled { background: #ccc; cursor: default; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="dot" id="status-dot"></div>
+  <h1>Raika Time Tracker 🌸</h1>
+</div>
+
+<div class="current-session">
+  <div class="label">正在计时</div>
+  <div class="title" id="current-title">加载中...</div>
+  <div class="time" id="current-time">0:00</div>
+  <div class="category" id="current-category">-</div>
+</div>
+
+<div class="stats">
+  <div class="label">今日 Top 5 <span id="pending-badge" class="pending-badge" style="display:none"></span></div>
+  <div id="stats-list">加载中...</div>
+</div>
+
+<button id="flush-btn">立刻上报数据</button>
+
+<div class="footer">每5分钟自动同步到 GitHub</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
