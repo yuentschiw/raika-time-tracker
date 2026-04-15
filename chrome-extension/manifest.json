@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Raika Time Tracker",
+  "version": "1.1.0",
+  "description": "自动追踪网页/REDoc停留时间，上报给 Raika",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "activeTab",
+    "idle"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://api.jsonbin.io/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Raika Time Tracker"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
