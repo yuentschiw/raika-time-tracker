@@ -1,4 +1,4 @@
-// Raika Time Tracker - Background Service Worker v4
+// Raika Time Tracker - Background Service Worker v4.1
 // 策略：仅追踪「当前聚焦窗口」的 active tab，解决多窗口误追踪
 
 const JSONBIN_KEY = "$2a$10$ZprY/cMDxkU1VHSX5dEiJ.bppSYR8JXoxx2smTlJwPjOvtYdmh1qy";
@@ -189,19 +189,32 @@ async function flush() {
   const { pendingRecords } = await getState();
   if (pendingRecords.length === 0) return;
   try {
+    // 读取现有数据
     const getResp = await fetch(JSONBIN_URL + "/latest", { headers: { "X-Master-Key": JSONBIN_KEY } });
     const getJson = await getResp.json();
     const existing = getJson.record?.records || [];
+
+    // 去重 + 30天过滤 + 只保留最近 300 条（防止 payload 超限）
     const cutoff = Date.now() - 30 * 24 * 3600 * 1000;
-    const merged = [...existing, ...pendingRecords].filter(r => new Date(r.timestamp || r.ts).getTime() > cutoff);
+    const merged = [...existing, ...pendingRecords]
+      .filter(r => new Date(r.timestamp || r.ts).getTime() > cutoff)
+      .sort((a, b) => new Date(a.timestamp || a.ts) - new Date(b.timestamp || b.ts))
+      .slice(-300);  // 只保留最新 300 条，防止超出 JSONBin 单次大小限制
+
+    const body = JSON.stringify({ records: merged, lastUpdated: new Date().toISOString() });
+    console.log(`[TT] flush payload: ${(body.length / 1024).toFixed(1)}KB, ${merged.length} records`);
+
     const putResp = await fetch(JSONBIN_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_KEY },
-      body: JSON.stringify({ records: merged, lastUpdated: new Date().toISOString() })
+      body
     });
     if (putResp.ok) {
-      console.log(`[TT] flushed ${pendingRecords.length} records`);
+      console.log(`[TT] ✅ flushed ${pendingRecords.length} pending records`);
       await setState({ pendingRecords: [] });
+    } else {
+      const errText = await putResp.text();
+      console.error(`[TT] PUT failed ${putResp.status}:`, errText.slice(0, 200));
     }
   } catch (e) { console.error("[TT] flush error:", e); }
 }
